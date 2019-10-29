@@ -1,0 +1,200 @@
+= Building an XP library
+
+This guide takes you through the steps of building a custom library for Enonic XP
+
+NOTE: XP libraries are created in Maven style. This means libraries also may contain Java, and be published to standard Maven repositories.
+
+== Introduction
+
+An XP library enables packaging of code and resources for reuse across different apps.
+In addition to Java, libraries may contain JavaScript controllers,  Content types, assets or other XP-specific resources.
+
+During this exercise you will:
+
+* Create your own library from a template
+* Build and publish your library
+* Use the library in an application
+* Best practices whenb building a library
+
+[NOTE]
+====
+The code samples in the starter also demonstrates interfacing Java from JavaScript, and testing your library code
+====
+
+== Create project
+
+To setup a project locally, run the following command and complete the steps:
+
+  enonic project create -r starter-lib
+
+NOTE: *If you don't have Enonic CLI?* Visit the https://developer.enonic.com/start[Getting started guide] to install it.
+
+
+== Project structure
+
+The project folder created in the previous step should now contain the following project structure:
+
+[source,files]
+----
+build.gradle <--1-->
+gradle.properties <--2-->
+build/ <--3-->
+src/
+  main/
+    java/ <!--4-->
+    resources/ <!--5-->
+  test/ <!--6-->
+----
+
+<1> The build script defining the tasks and dependencies for the project
+<2> Contains build artifact name and version, also specifies the XP version it is based on
+<3> Contains output files produced by the build
+<4> Contains sample Java code
+<5> Contains sample xp resources and JavaScripts
+<6> Contains sample code for automated testing of your library
+
+
+== Building the library
+
+From the project folder created (i.e. `myproject/`), run this command:
+
+  enonic project build
+
+This command now produces a .jar file in the folder `build/libs/` i.e. `build/libs/myproject.jar`
+
+NOTE: Unlike apps, libraries can not be deployed and run by themselves.
+
+
+== Publishing the library
+
+In order for other applications and projects to download and use the newly created library,
+it must first be published.
+
+XP and the Gradle build system supports Maven style repositories.
+This means we may use the local filesystem as a repo.
+Run the following command to publish the .jar file to your local repo:
+
+  enonic project gradle publishToMavenLocal
+
+If you used the default values when creating the project, you will find the library in your users home directory:
+`.m2/repository/com/example/myproject/1.0.0-SNAPSHOT/myproject-1.0.0-SNAPSHOT.jar`
+
+
+[NOTE]
+====
+Setting up and publishing to remote repositories is out-of-scope for this guide.
+For more details on this topic, check out https://docs.gradle.org/current/userguide/publishing_overview.html[Gradle's documentation]
+====
+
+
+== Using the library
+
+TIP: If you don't have an existing app to start testing with, simply run `enonic project create` once more, and choose any other starter.
+
+To use the newly published library in another XP application,
+you must add a dependency in your application's build file.
+
+The format of the dependency is: <group>:<name>:<version>.
+
+.Sample application build.gradle
+[source,groovy]
+----
+dependencies {
+    ...
+    include "com.example:myproject:1.0.0-SNAPSHOT"
+}
+----
+
+[NOTE]
+====
+Plain Java libraries normally use the `compile` statement,
+XP specific libraries should use `include`.
+Include works like compile, but additionally copies the contents of the library's src/main/resources/ folder into the target application.
+====
+
+Specifying the name and version of the artifact to publish is not always enough.
+The build system also need to know which repository to look in.
+
+For our example, the application needs to at least specify mavenLocal() as a source repository
+
+.Application build.gradle
+[source,groovy]
+----
+repositories {
+    ...
+    mavenLocal()
+    xp.enonicRepo()
+    ...
+}
+----
+
+NOTE: The example above adds both mavenLocal and Enonic's public repository to your app.
+
+When your build files are correctly configured, you may build the application from it's project folder (i.e. `myapp/`),
+run this command to complete the build:
+
+  enonic project build
+
+Similar to the library build, this command also produces a .jar file in `build/libs/`. i.e. `build/libs/myapp.jar`
+
+NOTE: To see the actual structure of the build, you may decompress the jar file
+
+The library can now be used from any JavaScript controller in the app, simply by requiring the lib and calling any exported functions:
+
+.Example code to use the controller `src/resources/lib/example/js-lib` from the library
+[source,JavaScript]
+----
+var myLib = require('/lib/example/js-lib');
+
+exports.get = function (req) {
+    var statement = myLib.hello('world');
+
+    return {
+        body: statement
+    }
+};
+----
+
+
+== Resource merging
+
+JavaScript, assets, schemas and other resources in the library's `src/main/resources/` folder will be merged into the target application.
+
+As such, files will be found in the same location they are placed in the library.
+This actually means that the target application can use any resource as if were created locally within the app.
+
+NOTE: The resource files of your application will always override same-name-files in a library. This may be useful if you want to replace one or more files from a library.
+
+[TIP]
+====
+To avoid conflicts, library developers should give their controllers a unique name/path i.e. `src/main/resources/lib/<unique-path-or-lib-name>.js`.
+This simplifies use of exports, and prevents collision with other libraries used by the app.
+====
+
+== Java
+
+In the end, an XP library is compiled into a standard Java Archive ()`.jar` file).
+This means it may also contain Java classes.
+
+Java packages and classes must be placed under path ``src/main/java``.
+They will be compiled and included in the library by the Gradle build system.
+
+Your project contains an example of how to add and use Java in your library.
+
+== Testing
+Just like any other application or project, you may write tests to verify your code.
+The library starter includes examples on how to write tests and run them during compilation.
+
+All tests must be placed under ``src/test/``
+Additionally, your build file must have testCompile statements to run tests.
+
+.build.gradle with support for running tests
+[source,JavaScript]
+----
+dependencies {
+    ...
+    testCompile "com.enonic.xp:testing:${xpVersion}"
+    testCompile 'org.mockito:mockito-core:2.+'
+    testCompile 'junit:junit:4.12'
+}
+----
