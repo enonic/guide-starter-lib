@@ -36,14 +36,14 @@ The project folder created in the previous step should now contain the following
 
 [source,files]
 ----
-build.gradle <--1-->
-gradle.properties <--2-->
-build/ <--3-->
+build.gradle // <1>
+gradle.properties // <2>
+build/ // <3>
 src/
   main/
-    java/ <!--4-->
-    resources/ <!--5-->
-  test/ <!--6-->
+    java/ // <4>
+    resources/ // <5>
+  test/ // <6>
 ----
 
 <1> The build script defining the tasks and dependencies for the project
