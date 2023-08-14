@@ -1,4 +1,4 @@
-= Building an XP library
+= Build an XP library
 
 This guide takes you through the steps of building a custom library for Enonic XP
 
