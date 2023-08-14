@@ -23,11 +23,11 @@ The code samples in the starter also demonstrates interfacing Java from JavaScri
 
 == Create project
 
-To setup a project locally, run the following command and complete the steps:
+To set up a project locally, run the following command and complete the steps:
 
   enonic project create -r starter-lib
 
-NOTE: *If you don't have Enonic CLI?* Visit the https://developer.enonic.com/start[Getting started guide] to install it.
+NOTE: *Don't have Enonic CLI?* Visit the https://developer.enonic.com/start[Getting started guide] to install it.
 
 
 == Project structure
