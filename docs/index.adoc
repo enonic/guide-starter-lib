@@ -83,7 +83,7 @@ If you used the default values when creating the project, you will find the libr
 [NOTE]
 ====
 Setting up and publishing to remote repositories is out-of-scope for this guide.
-For more details on this topic, check out https://docs.gradle.org/current/userguide/publishing_overview.html[Gradle's documentation]
+For more details on this topic, check out https://docs.gradle.org/current/userguide/publishing_setup.html[Gradle's documentation]
 ====
 
 
